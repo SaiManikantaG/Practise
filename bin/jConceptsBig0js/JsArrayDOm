@@ -1,0 +1,43 @@
+Iterating on Objects and avoiding iterating on prototype properties
+JavaScript
+// hasOwnProperty()
+var obj = {
+  name: 'JavaScript',
+  age: 19,
+  city: 'Mountain View',
+  state: 'CA'
+};
+
+Object.prototype.someFunction = function(){};
+
+for (var key in obj) {
+  if(obj.hasOwnProperty(key)) {
+    console.log(key + ' : ' + obj[key]);
+  }
+}
+ ----------------------------------------------------------
+Event handler -- > Click button
+
+<button onclick="clickButton()">ClickMe</button>
+<button onclick="alert('Thanks!')">ClickMe</button>
+
+<!--
+event attributes on HTML-tag are case
+ insensitive
+
+Pro: Simple and inline
+Con: messing HTML markups with JavaScript
+-->
+
+<!--passing the object itself -->
+<button onclick="clickButton(this)">ClickMe</button>
+<script type="text/javascript">
+  function clickButton(ref) {
+    alert(ref.innerHTML);
+    ref.innerHTML = 'Clicked';
+    ref.style['background-color'] = '#35ABE2';
+    ref.style['color'] = '#FFF';
+  }
+</script>
+ ----------------------------------------------------------
+

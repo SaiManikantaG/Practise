@@ -1,0 +1,147 @@
+===>JSON object should be serializable
+i.e. covertible to a string and vice-versa.
+
+var str = '{"name":"JavaScript","dob":1995,"author":"Brendan Eich",
+           "company":"Netscape"}';
+
+Serialization and deserialization
+ eval() : BAD. Too slow. Not secure.
+  XSS vulnerability.
+JavaScript
+//The text must be wrapped in
+//parenthesis to avoid a syntax error.
+
+var obj = eval("(" +str+")");
+Native JSON Parser [IE8+]
+JavaScript
+//String to JSON object
+//JSON.parse follows the Spec i.e. removes function and undefined values from the object
+var obj = JSON.parse(str);
+console.log(obj.author); //prints Brendan Eich
+
+//JSON object to string
+var s = JSON.stringify(obj);
+----------------------------------------------------------
+===>Java Script scope --> Function-level
+function showName () {
+  var myName = "Jack"; // local variable; only accessible in this showName function
+  console.log (myName); // Jack
+}
+showName();
+console.log (myName); // error, myName is not defined
+----------------------------------------------------------
+===>Scope--block-level
+
+function showName () {
+  if(true){
+    var myName = "Jack";
+  }
+  console.log (myName); // still prints Jack
+}
+----------------------------------------------------------
+===>Java script - closures
+
+function showName (firstName, lastName)
+{
+var nameIntro = "Your name is ";
+
+// this inner function has
+access to the outer function's variables,
+including the parameter
+
+function makeFullName ()
+{
+return nameIntro + firstName + " " + lastName;
+}
+
+return makeFullName ();
+}
+
+showName ("Michael", "Jackson");
+// Your name is Michael Jackson
+----------------------------------------------------------
+===>Closure rules:
+
+Inner function cannot call the outer
+function's arguments object.
+
+Closures have access to the outer
+function’s variable even after the
+outer function returns.
+
+
+function showName (firstName)
+{
+var nameIntro = "Your name is ";
+
+// this inner function has access
+ to the outer function's variables,
+ including the parameter
+
+function makeFullName (lastName)
+{
+return nameIntro + firstName + " " + lastName;
+}
+
+return makeFullName;
+}
+
+var myName = showName ("Michael");
+//At this juncture, the showName outer function has returned.
+
+// The closure (makeFullName) is called here
+after the outer function has returned above
+// Yet, the closure still has access to the
+outer function's variables and parameter
+myName ("Jackson");
+// Your name is Michael Jackson
+----------------------------------------------------------
+===>crazy behaviour::
+
+//array of functions
+var funcs = [];
+
+for (var i = 0; i < 3; i++) {          // let's create 3 functions
+funcs[i] = function() {               // and store them in funcs array
+console.log("My value: " + i);    // each should log its value.
+};
+}
+
+// and now let's run each one to see
+for (var j = 0; j < 3; j++) {
+funcs[j]();
+}
+
+//what values do you expect?
+JavaScript
+//output
+My value: 3
+My value: 3
+My value: 3
+----------------------------------------------------------
+===>Immediately Invoked Function Expression (IIFE)
+ An anonymous function that is executed right
+ after it is created. --> Closure resolved
+
+//array of functions
+var funcs = [];
+
+for (var i = 0; i < 3; i++) {
+funcs[i] = (function(index) {
+return function() {
+console.log("My value: " + index);
+};
+})(i);
+}
+// and now let's run each one to see
+for (var j = 0; j < 3; j++) {
+funcs[j]();
+}
+
+//what values do you expect?
+JavaScript
+//output
+My value: 0
+My value: 1
+My value: 2
+ ----------------------------------------------------------
