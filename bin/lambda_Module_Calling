@@ -1,0 +1,68 @@
+import module_name from './lib/module_name';
+
+const AWS = require('aws-sdk');
+const apigClientFactory = require('aws-apig-client');
+const Sequelize = require('sequelize');
+// Sequelize needs Tedious to be installed manually
+const Tedious = require('tedious'); // eslint-disable-line no-unused-vars
+
+// AWS configuration
+AWS.config.update({
+  region: 'us-east-1',
+});
+
+// credentials fucntion
+const apigUtilClient = apigClientFactory.newClient({
+  accessKey: process.env.AWS_ACCESS_KEY_ID,
+  secretKey: process.env.AWS_SECRET_ACCESS_KEY,
+  sessionToken: process.env.AWS_SESSION_TOKEN,
+  region: AWS.config.region,
+  invokeUrl: process.env.UTIL_URL,
+});
+
+
+//get credentials API GATEWAY to get credentials from S3
+const getCredentials = application =>
+  apigUtilClient.invokeApi(
+    {},
+    '/credentials',
+    'GET',
+    {
+      queryParams: {
+        Application: application,
+      },
+    },
+    {},
+  );
+
+const formatResponse = (results, status) => ({
+  status,
+  Items: results,
+});
+
+/* eslint-disable import/prefer-default-export */
+export async function handler(event, context, callback) {
+  console.log(JSON.stringify(event));
+
+  try {
+    const {data: dbCredentials} = await getCredentials(process.env.DB_APP);  // DB_APp : Database APPP
+
+    const sequelize = new Sequelize(
+      dbCredentials.DATABASE,
+      dbCredentials.USER,
+      dbCredentials.PASSWORD,
+      {
+        dialect: 'mssql',
+        host: dbCredentials.HOST,
+        port: dbCredentials.PORT,
+      },
+    );
+
+    const results = await container.get(event, sequelize);
+    // console.log(`Results: ${JSON.stringify(results)}`);
+    sequelize.close();
+    callback(null, formatResponse(results, 'Success'));
+  } catch (e) {
+    callback(e);
+  }
+}
