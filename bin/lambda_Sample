@@ -1,0 +1,77 @@
+const AWS = require('aws-sdk');
+const _ = require('lodash');
+
+const sqs = new AWS.SQS();
+
+const Queue_Name = process.env.Queue_Name;
+
+// AWS configuration
+AWS.config.update({
+  region: 'us-east-1',
+});
+
+// Generate a random GUID of 16bit
+/* eslint-disable */
+function randomUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// Generate present timestamp
+var timestamp = () => Math.floor(Date.now());
+
+console.log(randomUUID());
+
+const lambda__Function = (item, QUEUE_URL) =>
+  new Promise(() => {
+    // TODO: transform container item to KochNT struct
+    const some__Event = {
+      version: 'VERSION_1',
+      eventType: 'DATA_EVENT',
+      timestamp: timestamp(),
+      origin: 'AWS-POST-ORIGIN',
+      eventToken: null,
+      payload: {
+        dataEventType: 'Sme_Update_Data',
+        payload: item,
+      },
+    };
+
+    console.log(`Queue: ${QUEUE_URL}`);
+    console.log(`Write: ${JSON.stringify(some__Event)}`);
+
+    // TODO: send new message to KochNT queue
+    return sqs
+      .sendMessage({
+        QueueUrl: QUEUE_URL,
+        DelaySeconds: 0,
+        MessageBody: JSON.stringify(some__Event),
+      })
+      .promise();
+  });
+
+/* eslint-disable */
+/* import/prefer-default-export */
+export async function handler(event, context, callback) {
+  console.log(JSON.stringify(event));
+  try {
+    const acct = context.invokedFunctionArn.split(':')[4];
+    const QUEUE_URL = `https://sqs.us-east-1.amazonaws.com/${acct}/${
+      Some___Queue
+    }`;
+    if (event.Containers) {
+      await _.map(event.Containers, item =>
+        some__Function(item, QUEUE_URL)
+      );
+    } else {
+      await some__Fucntion(event, QUEUE_URL);
+    }
+    callback(null, { Status: 'Success' });
+  } catch (e) {
+    console.log(e);
+    callback({ Status: 'Error' });
+  }
+}
