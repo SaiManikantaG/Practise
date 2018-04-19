@@ -1,0 +1,25 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+IF OBJECT_ID('Prodecure_name') IS NULL
+    EXEC('CREATE PROCEDURE Prodecure_name AS SET NOCOUNT ON;')
+GO
+ALTER PROCEDURE [dbo].[Prodecure_name] 
+	-- Add the parameters for the stored procedure here
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT
+	-- Write the prodecure
+	WHERE 1=1;
+END
+GO
+
+GRANT EXEC ON dbo.Prodecure_name TO readonly(user_Name);
+GO
