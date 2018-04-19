@@ -1,0 +1,55 @@
+"use strict";
+var AWS = require('aws-sdk');
+var async = require('asyncawait/async');
+var await = require('asyncawait/await');
+var cred = require('./get-credentials.js');
+var _ = require('lodash');
+
+// AWS configuration
+AWS.config.update({
+    region: 'us-east-1'
+});
+
+/*
+Comma delimited format
+Both applications and keys must be in same order
+*/
+const applications = String(process.env.APPLICATIONS).split(',');
+const keys = String(process.env.KEYS).split(',');
+
+// const applications = 'bookrunner,ebs,sfdc,kquery,bkrdb'.split(',');
+// const keys = 'bkr,ebs,sfdc,kquery,bkrdb'.split(',');
+
+// Environment variables
+var tag = '';
+var acct = '';
+
+var keyMap = applications.map((item, idx) => {
+    return {
+        Application: item,
+        KeyFile: keys[idx]
+    };
+});
+
+exports.handler = async(function (event, context, callback) {
+
+    console.log(event);
+
+    if (context.functionVersion == '$LATEST') {
+        tag = '_DEV';
+    }
+
+    try {
+        var keyFile = _.find(keyMap, event);
+        if (!keyFile) {
+            callback('Invalid application', null);
+        } else {
+            var credentials = await (cred(process.env.KEYS_BUCKET, keyFile.KeyFile));
+            callback(null, credentials);
+        }
+    } catch (err) {
+        console.log(err);
+        callback(err, null);
+    }
+
+});
