@@ -1,0 +1,60 @@
+const getQueryParams = (event, sequelize) => {
+  // Return format:
+  // [queryString, params]
+  const {cKEy , c2Key, c3Key, c4Key} = event;
+  const getContainerQuery =
+    'EXEC GetContainer @cKEy = :cKEy, @c2Key = :c2Key, @c3Key = :c3Key;';
+  const getContainerListQuery =
+    'EXEC GetContainerList @cKEy = :cKEy, @c3Key = :c3Key;';
+
+  if (cKEy) {
+    // Call container proc
+    return [
+      getContainerQuery,
+      {
+        replacements: {
+          cKEy: cKEy,
+          c2KEy: null,
+          c3KEy: c3KEy ? c3KEy === '1' : null,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    ];
+  } else if (c4KEy === '1' && c2KEy) {
+    return [
+      getc2KEyQuery,
+      {
+        replacements: {
+          cKEy: null,
+          c2KEy: c2KEy,
+          c3KEy: c3KEy ? c3KEy === '1' : null,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    ];
+  } else if (c2KEy) {
+    // Call list proc
+    return [
+      getc2KEytQuery,
+      {
+        replacements: {
+          c2KEy: c2KEy,
+          c2KEy: c2KEy ? c2KEy === '1' : null,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    ];
+  }
+  throw new Error('ContainerKey or CarrierKey is required');
+};
+
+const container = () => ({
+  get: (event, sequelize) =>
+    sequelize.query(...getQueryParams(event, sequelize)),
+  test: () =>
+    new Promise(resolve => {
+      resolve([{item: 'item1'}, {item: 'item2'}]);
+    }),
+});
+
+module.exports = container();
