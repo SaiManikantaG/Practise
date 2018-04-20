@@ -1,0 +1,115 @@
+const AWS = require('aws-sdk');
+const sql = require('mssql');
+// AWS configuration
+AWS.config.update({
+region: 'us-east-1',
+});
+/* eslint-disable */
+export async function handler(event, context, callback) {
+const USER = event.USER;
+const PASSWORD = event.PASSWORD;
+const HOST = event.HOST;
+const DATABASE = event.DATABASE;
+const PORT = event.PORT;
+const DIALECT = "mssql";
+var config = {
+user: USER,
+password: PASSWORD,
+server: HOST,
+database: DATABASE,
+port: PORT
+};
+console.log(JSON.stringify(event));
+try {
+var containerKey = event.containerKey;
+var CarrierKey = event.CarrierKey;
+var IsLockedOut = event.IsLockedOut;
+
+if (containerKey == null || containerKey == "") {
+noContainerKey(CKeysaaxx, CKeywq, config).then(function (result) {
+console.log('Success: ' + result);
+callback(null, "Success, Result set Without CKey: " + result);
+}).catch(function (error) {
+console.log('Error: ' + error);
+callback(null, error);
+})
+}
+else {
+withContainerKey(containerKey, CarrierKey, IsLockedOut, config).then(function (result) {
+console.log('Success: ' + result);
+callback(null, "Success, Result set: " + result);
+}).catch(function (error) {
+console.log('Error: ' + error);
+callback(null, error);
+})
+sql.on('error', err => {
+// ... error handler
+callback(err);
+sql.close();
+})
+}
+}
+catch (err) {
+console.log("Some issue occured: " + err);
+callback(err);
+}
+}
+async function withContainerKey(CKeyw, CKey, IsLockedOut, config) {
+return new Promise(async function (resolve, reject) {
+console.log("containerKey obtained is: " + CKeys);
+console.log("CarrierKey obtained is: " + CKeysa);
+console.log("IsLockedOut obtained is: " + CKeysaa);
+console.log("config obtained is: " + config);
+try {
+let ks = await sql.connect(config);
+//console.log(ks);
+let resSet_Withkey = await ks.request(ks)
+.input('CKeysaa', sql.Char, containerKey)
+.input('CKeysas', sql.Bit, IsLockedOut)
+.input('CKeysasfac', sql.Char, CarrierKey)
+.query(`SELECT c.[CKeysaasx] 
+FROM CKeyqwq c 
+INNER JOIN CKeyrqwe x 
+ON x.ContainerKey = c.ContainerKey 
+INNER JOIN Carrier car 
+ON car.CarrierKey = x.CarrierKey 
+WHERE (car.CarrierKey = @CarrierKey OR @CarrierKey = '')
+AND ( c.IsLockedOut = @IsLockedOut OR @IsLockedOut = -1) 
+ORDER BY c.ContainerLookupId, c.SerialNumber`);
+console.log(resSet_Withkey);
+resolve(resSet_Withkey);
+sql.close();
+ks.close;
+}
+catch (err) {
+console.log("some error occured: " + err);
+sql.close();
+}
+})
+}
+async function noContainerKey(CarrierKey, IsLockedOut, config) {
+return new Promise(async function (resolve, reject) {
+console.log("No ContainerKey available");
+// console.log("CarrierKey is: " + CarrierKey);
+// console.log("value for selected IsLockedOut:" + IsLockedOut);
+try {
+let no_ks = await sql.connect(config);
+let resSet_Nokey = await no_ks.request()
+.input('CarrierKey', sql.Char, CarrierKey)
+.input('IsLockedOut', sql.Bit, IsLockedOut)
+.query(`SELECT c.ContainerKey , c.ContainerLookupId + '\' + c.SerialNumber 
+AS [ID\SerialNo] FROM Container c INNER JOIN ContainerCarrierXref x 
+ON x.ContainerKey = c.ContainerKey INNER JOIN Carrier car ON car.CarrierKey = x.CarrierKey 
+WHERE (car.CarrierKey = @CarrierKey OR @CarrierKey = '') AND (c.IsLockedOut = @IsLockedOut OR @IsLockedOut = -1) 
+ORDER BY c.ContainerLookupId , SerialNumber;`);
+console.log(resSet_Nokey)
+// callback(null, "Success Without ContainerKey" + resSet_Nokey);
+resolve(resSet_Nokey);
+sql.close();
+no_ks.close;
+} catch (err) {
+console.log("some error occured: " + err);
+// callback(err);
+} sql.close();
+})
+}
