@@ -27,7 +27,6 @@ console.log(randomUUID());
 
 const lambda__Function = (item, QUEUE_URL) =>
   new Promise(() => {
-    // TODO: transform container item to KochNT struct
     const some__Event = {
       version: 'VERSION_1',
       eventType: 'DATA_EVENT',
@@ -43,7 +42,6 @@ const lambda__Function = (item, QUEUE_URL) =>
     console.log(`Queue: ${QUEUE_URL}`);
     console.log(`Write: ${JSON.stringify(some__Event)}`);
 
-    // TODO: send new message to KochNT queue
     return sqs
       .sendMessage({
         QueueUrl: QUEUE_URL,
